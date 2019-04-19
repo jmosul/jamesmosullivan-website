@@ -1,7 +1,7 @@
 {
-  "name": "jamesmosullivan-website",
-  "description": "",
+  "name": "jamesmosullivan-website-vue",
   "version": "0.1.0",
+  "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -13,7 +13,6 @@
     "vuetify": "^1.5.5"
   },
   "devDependencies": {
-    "serverless-s3-sync": "^1.7.3",
     "@vue/cli-plugin-babel": "^3.6.0",
     "@vue/cli-plugin-eslint": "^3.6.0",
     "@vue/cli-service": "^3.6.0",
