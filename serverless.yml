@@ -1,0 +1,65 @@
+service: jamesmosullivan-personal-website
+
+plugins:
+  - serverless-webpack
+  - serverless-s3-sync
+  - serverless-offline
+
+custom:
+  siteName: jamesmosullivan
+  bucketName: jamesmosullivan.uk
+  s3Sync:
+    - bucketName: ${self:custom.bucketName}
+      localDir: dist
+  hostedZoneName: jamesmosullivan.uk.
+  aliasHostedZoneId: Z1BKCTXD74EZPE
+  aliasDNSName: s3-website-eu-west-1.amazonaws.com
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  profile: serverless
+  region: eu-west-1
+
+resources:
+  Resources:
+    StaticSite:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: ${self:custom.bucketName}
+        WebsiteConfiguration:
+          IndexDocument: index.html
+    StaticSiteS3BucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: StaticSite
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+                - s3:GetObject
+              Resource:
+                Fn::Join: [
+                  "", [
+                  "arn:aws:s3:::",
+                  {
+                    "Ref": "StaticSite"
+                  },
+                  "/*"
+                ]
+                ]
+    DnsRecord:
+      Type: "AWS::Route53::RecordSet"
+      Properties:
+        AliasTarget:
+          DNSName: ${self:custom.aliasDNSName}
+          HostedZoneId: ${self:custom.aliasHostedZoneId}
+        HostedZoneName: ${self:custom.hostedZoneName}
+        Name:
+          Ref: StaticSite
+        Type: 'A'
+

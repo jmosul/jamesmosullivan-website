@@ -1,0 +1,17 @@
+{
+  "name": "jamesmosullivan-website",
+  "description": "",
+  "version": "0.1.0",
+  "dependencies": {
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "serverless-offline": "^4.9.4",
+    "serverless-s3-sync": "^1.7.3",
+    "serverless-webpack": "^5.2.0",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.30.0"
+  }
+}
+Ø
