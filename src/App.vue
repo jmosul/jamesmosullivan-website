@@ -1,5 +1,5 @@
 <template>
-  <p>My Serverless Vue App</p>
+  <p>My Serverless Vue App Deploying</p>
 </template>
 
 <script>
