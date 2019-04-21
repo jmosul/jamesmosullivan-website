@@ -18,8 +18,7 @@ custom:
     - bucketName: ${self:custom.bucketName}
       localDir: dist
   hostedZoneName: jamesmosullivan.uk.
-  aliasHostedZoneId: Z1BKCTXD74EZPE
-  aliasDNSName: s3-website-eu-west-1.amazonaws.com
+  aliasHostedZoneId: Z2FDTNDATAQYW2
 
 provider:
   name: aws
@@ -102,12 +101,33 @@ resources:
       Type: "AWS::Route53::RecordSet"
       Properties:
         AliasTarget:
-          DNSName: ${self:custom.aliasDNSName}
+          DNSName: !GetAtt
+            - StaticSiteCDN
+            - WebsiteURL
           HostedZoneId: ${self:custom.aliasHostedZoneId}
         HostedZoneName: ${self:custom.hostedZoneName}
         Name:
           Ref: StaticSite
         Type: 'A'
+    StaticSiteCDN:
+      Type: "AWS::CloudFront::Distribution"
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: !GetAtt
+                - StaticSite
+                - DomainName
+              Id: StaticSiteOrigin
+              S3OriginConfig: {}
+          Enabled: 'true'
+          DefaultCacheBehavior:
+            TargetOriginId: StaticSiteOrigin
+            ForwardedValues:
+              QueryString: 'false'
+            ViewerProtocolPolicy: allow-all
+          PriceClass: "PriceClass_100"
+          ViewerCertificate:
+            CloudFrontDefaultCertificate: 'true'
     CognitoUserPool:
       Type: "AWS::Cognito::UserPool"
       Properties:
