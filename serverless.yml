@@ -2,8 +2,15 @@ service: jamesmosullivan-personal-website
 
 plugins:
   - serverless-s3-sync
+  - serverless-dynamodb-local
+  - serverless-offline
 
 custom:
+  stage: dev
+  postsTableName: 'posts'
+  dynamodb:
+    start:
+      migrate: true
   siteName: jamesmosullivan
   bucketName: jamesmosullivan.uk
   s3Sync:
@@ -15,10 +22,38 @@ custom:
 
 provider:
   name: aws
-  stage: dev
+  stage: ${self:custom.stage}
   runtime: nodejs8.10
   profile: serverless
   region: eu-west-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["PostsDynamoDBTable", "Arn" ] }
+  environment:
+    STAGE: ${self:custom.stage}
+    POSTS_TABLE: ${self:custom.postsTableName}
+
+functions:
+  posts_store:
+    handler: handler.posts_store
+    events:
+      - http:
+          path: posts
+          method: post
+  posts_index:
+    handler: handler.posts_index
+    events:
+      - http:
+          path: posts
+          method: get
 
 resources:
   Resources:
@@ -61,4 +96,16 @@ resources:
         Name:
           Ref: StaticSite
         Type: 'A'
-
+    PostsDynamoDBTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: pageId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pageId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.postsTableName}

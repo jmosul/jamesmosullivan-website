@@ -4,8 +4,9 @@ jspm_packages
 
 # Serverless directories
 .serverless
+.dynamodb
 
 .idea
 dist
-http-requests
+.http-requests
 http-client.env.json

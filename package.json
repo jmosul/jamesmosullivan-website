@@ -5,10 +5,19 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "offline": "serverless offline start",
+    "deploy": "serverless deploy -v",
+    "invoke:posts_index": "sls invoke local -f posts_index"
   },
   "dependencies": {
+    "aws-sdk": "^2.441.0",
+    "body-parser": "^1.18.3",
     "core-js": "^2.6.5",
+    "dynamoose": "^1.7.2",
+    "serverless-dynamodb-local": "^0.2.37",
+    "serverless-offline": "^4.9.4",
+    "uuid": "^3.3.2",
     "vue": "^2.6.10",
     "vuetify": "^1.5.5"
   },
