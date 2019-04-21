@@ -7,6 +7,7 @@ plugins:
 
 custom:
   stage: dev
+  cognitoPoolName: 'jade-users'
   postsTableName: 'posts'
   dynamodb:
     start:
@@ -48,12 +49,23 @@ functions:
       - http:
           path: posts
           method: post
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: ApiGatewayAuthorizer
   posts_index:
     handler: handler.posts_index
     events:
       - http:
           path: posts
           method: get
+
+package:
+  exclude:
+    - ".*/**"
+    - "dist/**"
+    - "src/**"
+    - "public/**"
 
 resources:
   Resources:
@@ -96,6 +108,39 @@ resources:
         Name:
           Ref: StaticSite
         Type: 'A'
+    CognitoUserPool:
+      Type: "AWS::Cognito::UserPool"
+      Properties:
+        MfaConfiguration: OFF
+        UserPoolName: ${self:custom.cognitoPoolName}
+        UsernameAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireLowercase: False
+            RequireNumbers: True
+            RequireSymbols: False
+            RequireUppercase: True
+    CognitoUserPoolClient:
+      Type: "AWS::Cognito::UserPoolClient"
+      Properties:
+        ClientName: ${self:custom.cognitoPoolName}-client
+        GenerateSecret: False
+        UserPoolId:
+          Ref: CognitoUserPool
+    ApiGatewayAuthorizer:
+      DependsOn:
+        - ApiGatewayRestApi
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        Name: ${self:custom.cognitoPoolName}-cognito-authorizer
+        IdentitySource: method.request.header.Authorization
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::GetAtt: [CognitoUserPool, Arn]
     PostsDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
