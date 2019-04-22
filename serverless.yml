@@ -144,6 +144,8 @@ resources:
     CognitoUserPool:
       Type: "AWS::Cognito::UserPool"
       Properties:
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: true
         MfaConfiguration: OFF
         UserPoolName: ${self:custom.cognitoPoolName}
         UsernameAttributes:
