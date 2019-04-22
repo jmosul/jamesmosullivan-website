@@ -103,7 +103,7 @@ resources:
         AliasTarget:
           DNSName: !GetAtt
             - StaticSiteCDN
-            - WebsiteURL
+            - DomainName
           HostedZoneId: ${self:custom.aliasHostedZoneId}
         HostedZoneName: ${self:custom.hostedZoneName}
         Name:
@@ -116,14 +116,17 @@ resources:
           Origins:
             - DomainName: !GetAtt
                 - StaticSite
-                - DomainName
-              Id: StaticSiteOrigin
-              S3OriginConfig: {}
+                - WebsiteURL
+              Id: StaticSiteCustomOrigin
+              CustomOriginConfig:
+                HTTPPort: '80'
+                HTTPSPort: '443'
+                OriginProtocolPolicy: http-only
           Enabled: 'true'
           DefaultCacheBehavior:
-            TargetOriginId: StaticSiteOrigin
+            TargetOriginId: StaticSiteCustomOrigin
             ForwardedValues:
-              QueryString: 'false'
+              QueryString: 'true'
             ViewerProtocolPolicy: allow-all
           PriceClass: "PriceClass_100"
           ViewerCertificate:
