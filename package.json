@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint",
     "offline": "serverless offline start",
     "deploy": "serverless deploy -v",
+    "deploy:production": "serverless deploy -v",
+    "dynamo": "sls dynamodb install",
     "invoke:posts_index": "sls invoke local -f posts_index"
   },
   "dependencies": {
@@ -45,7 +47,9 @@
       "plugin:vue/essential",
       "eslint:recommended"
     ],
-    "rules": {},
+    "rules": {
+      "no-console": "warn"
+    },
     "parserOptions": {
       "parser": "babel-eslint"
     }

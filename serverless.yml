@@ -7,12 +7,9 @@ plugins:
   - serverless-offline
 
 custom:
-  stage: dev
+  stage: ${opt:stage, self:provider.stage}
   cognitoPoolName: 'jade-users'
-  postsTableName: 'posts'
-  dynamodb:
-    start:
-      migrate: true
+  postsTableName: '${self:provider.stage}-jamesmosullivan-posts'
   siteName: jamesmosullivan
   bucketName: jamesmosullivan.uk
   s3Sync:
@@ -28,10 +25,15 @@ custom:
     createRoute53Record: true
     endPoint: edge
     hostedZoneId: ${self:custom.aliasHostedZoneId}
+  envVars:
+    dev:
+      API_HOST: 'http://localhost:3000'
+    production:
+      API_HOST: 'https://api.jamesmosullivan.uk'
 
 provider:
   name: aws
-  stage: ${self:custom.stage}
+  stage: dev
   runtime: nodejs8.10
   profile: serverless
   region: eu-west-1
@@ -66,6 +68,12 @@ functions:
     events:
       - http:
           path: posts
+          method: get
+  posts_latest:
+    handler: handler.posts_latest
+    events:
+      - http:
+          path: posts/latest
           method: get
 
 package:
@@ -180,11 +188,15 @@ resources:
       Type: 'AWS::DynamoDB::Table'
       Properties:
         AttributeDefinitions:
-          - AttributeName: pageId
+          - AttributeName: blog
+            AttributeType: S
+          - AttributeName: postId
             AttributeType: S
         KeySchema:
-          - AttributeName: pageId
+          - AttributeName: blog
             KeyType: HASH
+          - AttributeName: postId
+            KeyType: "RANGE"
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

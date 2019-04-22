@@ -71,23 +71,29 @@
           </v-flex>
         </v-layout>
       </section>
-      </v-footer>
+      <section>
+        <v-flex xs12>
+          <latest-blog></latest-blog>
+        </v-flex>
+      </section>
     </v-content>
   </v-app>
 </template>
 
 <script>
 
-import HomeHero from './components/HomeHero';
+import HomeHero from '@/components/HomeHero';
+import LatestBlog from '@/components/LatestBlog';
 
 export default {
   name: 'App',
   components: {
-      HomeHero
+      HomeHero,
+      LatestBlog
   },
   data () {
     return {
-
+        title: "Home"
     }
   }
 }
