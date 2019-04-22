@@ -1,6 +1,7 @@
 service: jamesmosullivan-personal-website
 
 plugins:
+  - serverless-domain-manager
   - serverless-s3-sync
   - serverless-dynamodb-local
   - serverless-offline
@@ -19,6 +20,14 @@ custom:
       localDir: dist
   hostedZoneName: jamesmosullivan.uk.
   aliasHostedZoneId: Z2FDTNDATAQYW2
+  customDomain:
+    domainName: api.jamesmosullivan.uk
+    certificateName: '*.jamesmosullivan.uk'
+    basePath: ''
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    endPoint: edge
+    hostedZoneId: ${self:custom.aliasHostedZoneId}
 
 provider:
   name: aws
@@ -114,9 +123,7 @@ resources:
       Properties:
         DistributionConfig:
           Origins:
-            - DomainName: !GetAtt
-                - StaticSite
-                - WebsiteURL
+            - DomainName: ${self:custom.bucketName}.s3-website-eu-west-1.amazonaws.com
               Id: StaticSiteCustomOrigin
               CustomOriginConfig:
                 HTTPPort: '80'
@@ -124,16 +131,16 @@ resources:
                 OriginProtocolPolicy: http-only
           Aliases:
             - www.jamesmosullivan.uk
-            - jamesmosullivan.uk
           Enabled: 'true'
           DefaultCacheBehavior:
             TargetOriginId: StaticSiteCustomOrigin
             ForwardedValues:
               QueryString: 'true'
-            ViewerProtocolPolicy: allow-all
+            ViewerProtocolPolicy: redirect-to-https
           PriceClass: "PriceClass_100"
           ViewerCertificate:
-            AcmCertificateArn: 'arn:aws:acm:eu-west-1:192047392996:certificate/e281dbf6-3a2e-4c40-a0a7-7d683ddf2d19'
+            SslSupportMethod: sni-only
+            AcmCertificateArn: 'arn:aws:acm:us-east-1:192047392996:certificate/71fe49c1-a0aa-41b2-9933-069b22960563'
     CognitoUserPool:
       Type: "AWS::Cognito::UserPool"
       Properties:
