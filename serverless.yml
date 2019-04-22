@@ -119,6 +119,9 @@ resources:
                 - DomainName
               Id: StaticSiteOrigin
               S3OriginConfig: {}
+          Aliases: 
+            - www.jamesmosullivan.uk
+            - jamesmosullivan.uk
           Enabled: 'true'
           DefaultCacheBehavior:
             TargetOriginId: StaticSiteOrigin
@@ -127,7 +130,7 @@ resources:
             ViewerProtocolPolicy: allow-all
           PriceClass: "PriceClass_100"
           ViewerCertificate:
-            CloudFrontDefaultCertificate: 'true'
+            AcmCertificateArn: 'arn:aws:acm:eu-west-1:192047392996:certificate/e281dbf6-3a2e-4c40-a0a7-7d683ddf2d19'
     CognitoUserPool:
       Type: "AWS::Cognito::UserPool"
       Properties:
