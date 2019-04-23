@@ -6,21 +6,12 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --production",
     "lint": "vue-cli-service lint",
-    "offline": "serverless offline start",
     "deploy": "serverless deploy -v",
     "deploy:production": "serverless deploy -v",
-    "dynamo": "sls dynamodb install",
-    "invoke:posts_index": "sls invoke local -f posts_index"
   },
   "dependencies": {
     "aws-sdk": "^2.441.0",
-    "body-parser": "^1.18.3",
     "core-js": "^2.6.5",
-    "dynamoose": "^1.7.2",
-    "serverless-domain-manager": "^3.2.1",
-    "serverless-dynamodb-local": "^0.2.37",
-    "serverless-offline": "^4.9.4",
-    "uuid": "^3.3.2",
     "vue": "^2.6.10",
     "vuetify": "^1.5.5"
   },

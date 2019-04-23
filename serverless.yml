@@ -1,15 +1,10 @@
-service: jamesmosullivan-personal-website
+service: jamesmosullivan-website
 
 plugins:
-  - serverless-domain-manager
   - serverless-s3-sync
-  - serverless-dynamodb-local
-  - serverless-offline
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  cognitoPoolName: 'jade-users'
-  postsTableName: '${self:provider.stage}-jamesmosullivan-posts'
   siteName: jamesmosullivan
   bucketName: jamesmosullivan.uk
   s3Sync:
@@ -17,64 +12,15 @@ custom:
       localDir: dist
   hostedZoneName: jamesmosullivan.uk.
   aliasHostedZoneId: Z2FDTNDATAQYW2
-  customDomain:
-    domainName: api.jamesmosullivan.uk
-    certificateName: '*.jamesmosullivan.uk'
-    basePath: ''
-    stage: ${self:provider.stage}
-    createRoute53Record: true
-    endPoint: edge
-    hostedZoneId: ${self:custom.aliasHostedZoneId}
-  envVars:
-    dev:
-      API_HOST: 'http://localhost:3000'
-    production:
-      API_HOST: 'https://api.jamesmosullivan.uk'
 
 provider:
   name: aws
   stage: dev
   runtime: nodejs8.10
   profile: serverless
-  region: eu-west-1
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - { "Fn::GetAtt": ["PostsDynamoDBTable", "Arn" ] }
+  region: us-east-1
   environment:
     STAGE: ${self:custom.stage}
-    POSTS_TABLE: ${self:custom.postsTableName}
-
-functions:
-  posts_store:
-    handler: handler.posts_store
-    events:
-      - http:
-          path: posts
-          method: post
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: ApiGatewayAuthorizer
-  posts_index:
-    handler: handler.posts_index
-    events:
-      - http:
-          path: posts
-          method: get
-  posts_latest:
-    handler: handler.posts_latest
-    events:
-      - http:
-          path: posts/latest
-          method: get
 
 package:
   exclude:
@@ -149,55 +95,3 @@ resources:
           ViewerCertificate:
             SslSupportMethod: sni-only
             AcmCertificateArn: 'arn:aws:acm:us-east-1:192047392996:certificate/71fe49c1-a0aa-41b2-9933-069b22960563'
-    CognitoUserPool:
-      Type: "AWS::Cognito::UserPool"
-      Properties:
-        AdminCreateUserConfig:
-          AllowAdminCreateUserOnly: true
-        MfaConfiguration: OFF
-        UserPoolName: ${self:custom.cognitoPoolName}
-        UsernameAttributes:
-          - email
-        Policies:
-          PasswordPolicy:
-            MinimumLength: 6
-            RequireLowercase: False
-            RequireNumbers: True
-            RequireSymbols: False
-            RequireUppercase: True
-    CognitoUserPoolClient:
-      Type: "AWS::Cognito::UserPoolClient"
-      Properties:
-        ClientName: ${self:custom.cognitoPoolName}-client
-        GenerateSecret: False
-        UserPoolId:
-          Ref: CognitoUserPool
-    ApiGatewayAuthorizer:
-      DependsOn:
-        - ApiGatewayRestApi
-      Type: AWS::ApiGateway::Authorizer
-      Properties:
-        Name: ${self:custom.cognitoPoolName}-cognito-authorizer
-        IdentitySource: method.request.header.Authorization
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        Type: COGNITO_USER_POOLS
-        ProviderARNs:
-          - Fn::GetAtt: [CognitoUserPool, Arn]
-    PostsDynamoDBTable:
-      Type: 'AWS::DynamoDB::Table'
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: blog
-            AttributeType: S
-          - AttributeName: postId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: blog
-            KeyType: HASH
-          - AttributeName: postId
-            KeyType: "RANGE"
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:custom.postsTableName}
